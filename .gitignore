@@ -5,6 +5,7 @@ zookeeper.out
 node_modules/*
 package-lock.json
 output.log
+**/__pycache__/
 
 # Ignore any generted html files
 *.html

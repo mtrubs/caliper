@@ -32,13 +32,29 @@ let blockCommitSatus = new Map();
 let currentBlockNum=0;
 
 /**
+ * Gets a URL from configuration. If urls is a string then it is that single URL.
+ * If urls is an array then it will pick one at random.
+ * @param {string|object} urls a url string or an array of urls.
+ * @returns {string} a url.
+ */
+function getUrl(urls) {
+    if (Array.isArray(urls)) {
+        return urls[parseInt(Math.random() * urls.length)];
+    } else if (typeof urls === 'string') {
+        return urls;
+    } else {
+        throw new Error('Unable to get a url from the provided configuration');
+    }
+}
+
+/**
 * Get the last recent block id for the block chain
 * @return {Promise<String>} last recent block id
 */
 async function getCurrentBlockId() {
     const request = require('request-promise');
     let config = require(configPath);
-    let restApiUrl = config.sawtooth.network.restapi.url;
+    let restApiUrl = getUrl(config.sawtooth.network.restapi.url);
     const blocks = restApiUrl + '/blocks?limit=1';
     let options = {
         uri: blocks
@@ -170,7 +186,7 @@ function getBatchEventResponse(block_num, batchStats) {
 function getState(address) {
     let txStatus = new TxStatus(0);
     let config = require(configPath);
-    let restApiUrl = config.sawtooth.network.restapi.url;
+    let restApiUrl = getUrl(config.sawtooth.network.restapi.url);
     const stateLink = restApiUrl + '/state?address=' + address;
     let options = {
         uri: stateLink
@@ -225,7 +241,7 @@ function querybycontext(context, contractID, contractVer, address) {
 async function submitBatches(block_num, batchBytes) {
     let txStatus = new TxStatus(0);
     let config = require(configPath);
-    let restApiUrl = config.sawtooth.network.restapi.url;
+    let restApiUrl = getUrl(config.sawtooth.network.restapi.url);
     const request = require('request-promise');
     let options = {
         method: 'POST',
@@ -243,7 +259,6 @@ async function submitBatches(block_num, batchBytes) {
             return Promise.resolve(txStatus);
         });
 }
-
 
 /**
  * Sawtooth class, which implements the caliper's NBI for hyperledger sawtooth lake
@@ -266,7 +281,7 @@ class Sawtooth extends BlockchainInterface {
     init() {
         // todo: sawtooth
         let config = require(configPath);
-        let validatorUrl = config.sawtooth.network.validator.url;
+        let validatorUrl = getUrl(config.sawtooth.network.validator.url);
         if(validatorUrl === null) {
             log('Error: Validator url is missing!!!');
         }
@@ -308,7 +323,7 @@ class Sawtooth extends BlockchainInterface {
     releaseContext(context) {
         // todo:
         let config = require(configPath);
-        let validatorUrl = config.sawtooth.network.validator.url;
+        let validatorUrl = getUrl(config.sawtooth.network.validator.url);
         if(validatorUrl === null) {
             log('Error: Validator url is missing!!!');
         }
